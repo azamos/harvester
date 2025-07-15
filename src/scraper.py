@@ -12,6 +12,7 @@ USER_CLASS_NAME = "hnuser"
 debug_mode = False
 
 NA = "NA"
+DISCUSS = "discuss"
 
 #HTML fields and elements
 HREF="href"
@@ -79,24 +80,24 @@ def extract_from_soup(soup,p_num):
         #TODO: efficiency maybe can be improved by using parent or next
         score_sp = soup.find(SPAN,id = "score_"+id)
         score = NA
+        num_comments = NA
+        author_name = NA
+        author_link = NA
         #TODO: instead of checking for the missing score, it will be smarter to
         #check for missing "subline" class span(child of class="subtext" td - always present)
-        if score_sp:#I've noticed that when score is missing, so is author - must validate this assumption
+        if score_sp:# When score is missing, so is author and number of comments.
             score = score_sp.get_text()
             score_parent = score_sp.parent
             user_a = score_parent.find(A,class_ = USER_CLASS_NAME)
             author_name = user_a.get_text()
             author_link = user_a[HREF]
             comments_str = score_parent.find_all("a")[-1].get_text()
-            num_comments = NA
             try:
                 num_comments_str = comments_str.split(COMMENTS_SPLITTER)[0]#TODO: remove magic number
-                num_comments = int(num_comments_str)
+                num_comments = 0 if(num_comments_str == DISCUSS) else int(num_comments_str)
             except Exception as e:
                 errprint(e)
-        else:#have to set to NA since previous author_name and link might have values from the previous iteration
-            author_name = NA
-            author_link = NA
+            
 
         extracted_data.append(
             {
@@ -115,7 +116,7 @@ def save_to_csv(posts_list):
 
     is_file_exists = os.path.exists(OUTPUT_FILE_PATH) and os.path.getsize(OUTPUT_FILE_PATH) > 0
 
-    with open(OUTPUT_FILE_PATH,'a',newline='') as csvfile:
+    with open(OUTPUT_FILE_PATH,'a',newline='',encoding="utf-8") as csvfile:
         writer = csv.DictWriter(csvfile,fieldnames=fields)
         if not is_file_exists:
             writer.writeheader()
@@ -151,13 +152,13 @@ if __name__ == "__main__":
     dbgprint("After argument parsing...")
     extracted_data = []
     try:
-        for i in range(1,2):
+        for i in range(1,6):
             i_soup = local_parser(STATIC_FILE_PATH+"/"+str(i)+HTM_SUFFIX)
             extracted_data += extract_from_soup(i_soup,i)
     except Exception as e:
         errprint(f"Error during scraping: {e}")
 
-    dbgprint(f"Extracted data: {extracted_data}")
+    # dbgprint(f"Extracted data: {extracted_data}")
     print("Writing data to csv...")
     try:
         save_to_csv(extracted_data)
