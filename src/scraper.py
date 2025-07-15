@@ -3,11 +3,15 @@ from bs4 import BeautifulSoup
 import csv
 import argparse
 import os
+import sys
 
 SOURCE_URL = "https://news.ycombinator.com/"
 TR_CLASS_NAME = "athing submission"
 TITLE_A_CLASS_NAME = "titleline"
 USER_CLASS_NAME = "hnuser"
+
+START = 1
+EOF_MOCK = 6
 
 debug_mode = False
 
@@ -29,7 +33,6 @@ POINTS = "Points"
 AUTHOR = "Author"
 NUMBER_OF_COMMENTS = "Number of comments"
 PAGE_NUMBER = "Page number"
-
 
 DEFAULT_NUM_POST = 50
 DEAULT_MIN_SCORE = 0
@@ -64,7 +67,8 @@ def local_parser(file_path):
         html = f.read()
     return BeautifulSoup(html,"html.parser")
 
-#TODO: add filtering function
+def filter(unfiltered_data,min_score,max_score):
+    return [data_entry for data_entry in unfiltered_data if min_score <= data_entry[POINTS] <= max_score]
 
 def extract_from_soup(soup,p_num):
     extracted_data = []
@@ -79,14 +83,15 @@ def extract_from_soup(soup,p_num):
 
         #TODO: efficiency maybe can be improved by using parent or next
         score_sp = soup.find(SPAN,id = "score_"+id)
-        score = NA
-        num_comments = NA
+        score = 0#NA bad
+        num_comments = NA#might change to something else
         author_name = NA
         author_link = NA
         #TODO: instead of checking for the missing score, it will be smarter to
         #check for missing "subline" class span(child of class="subtext" td - always present)
         if score_sp:# When score is missing, so is author and number of comments.
-            score = score_sp.get_text()
+            score = int(score_sp.get_text().split("points")[0].strip())
+            # print(f"score = {score}")
             score_parent = score_sp.parent
             user_a = score_parent.find(A,class_ = USER_CLASS_NAME)
             author_name = user_a.get_text()
@@ -123,6 +128,24 @@ def save_to_csv(posts_list):
         for post_dict in posts_list:
             writer.writerow(post_dict)
 
+def validate_args(args):
+    num_post = args.num_post
+    min_score = args.min_score
+    max_score = args.max_score
+    list_string = args.list_string
+    if num_post < 0:
+        raise ValueError("num_post must be >= 0 ")
+    if(min_score < 0 or min_score <0):
+        raise ValueError("scores must be at least 0")
+    if(min_score>max_score):
+        raise ValueError("min_score must be <= max_score")
+    try:
+        pages = set([int(i.strip()) for i in list_string.split(",") if i.strip()])
+        print(pages)#using print, since debug mode isn't set yet...
+    except Exception as e:
+        raise ValueError("list must be in the format of int,int,...")
+    
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--num_post",type=int,default=DEFAULT_NUM_POST,help=HELP_NUM_POST)
@@ -138,25 +161,32 @@ if __name__ == "__main__":
     print("Trying to prase arguments...")
     args = parse_args()
     try:
+        validate_args(args)
         debug_mode = args.debug
         dbgprint("DEBUG MODE ON!")
-        dbgprint(args.num_post)
-        dbgprint(args.min_score)
-        dbgprint(args.max_score)
         s = args.list_string
-        dbgprint(s)
-        skip_pages = [int(i) for i in s.split(",") if i]
+        skip_pages = set([int(i.strip()) for i in s.split(",") if i.strip()])
         dbgprint(f"The skip list is: {skip_pages}")
     except Exception as e:
         errprint(f"something went wrong with argument parsing: {e}")
+        sys.exit(1)
+
     dbgprint("After argument parsing...")
     extracted_data = []
-    try:
-        for i in range(1,6):
+    filtered_post_count = 0
+    try:#TODO: need to add skipping the pages specified in skip_pages
+        i = START
+        while  i < EOF_MOCK:
             i_soup = local_parser(STATIC_FILE_PATH+"/"+str(i)+HTM_SUFFIX)
-            extracted_data += extract_from_soup(i_soup,i)
+            remaining = args.num_post - filtered_post_count
+            filtered_data = filter(extract_from_soup(i_soup,i),args.min_score,args.max_score)
+            limited_data = filtered_data[:remaining]
+            filtered_post_count += len(limited_data)
+            extracted_data.extend(limited_data)
+            i+=1
     except Exception as e:
         errprint(f"Error during scraping: {e}")
+        sys.exit(1)
 
     # dbgprint(f"Extracted data: {extracted_data}")
     print("Writing data to csv...")
@@ -164,4 +194,5 @@ if __name__ == "__main__":
         save_to_csv(extracted_data)
     except Exception as e:
         errprint(f"Saving to CSV failed: {e}")
+        sys.exit(1)
     print("DONE")
