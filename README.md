@@ -36,13 +36,10 @@
 1. **Run the scraper:**
 
    ```bash
-   python hackernews_scraper.py
+   python src/scraper.py --num_post 5 --min_score 10 --max_score 1000 --list_string 1,2,3
    ```
 
-2. **Run tests:**
-   ```bash
-   pytest
-   ```
+   Replace the ingegers after num_post, min_score and max_score as you wish. The list_string expects integers in a similar format.
 
 ## Dependencies
 
