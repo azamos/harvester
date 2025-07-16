@@ -1,31 +1,24 @@
 import requests
 from bs4 import BeautifulSoup
 import csv
-import argparse
 import os
-import sys
-from constants import *
-
-debug_mode = False
-
-def dbgprint(msg):
-    if(debug_mode):
-        print(f"[DEBUG] {msg}")
-
-def errprint(msg):
-    print(f"[ERROR] {msg}")
-
+from constants import (
+    UTF_8,READ_MODE,HTML_PARSER,POINTS,TR_CLASS_NAME,TR,TR_CLASS_NAME,ID,SPAN,
+    TITLE_A_CLASS_NAME,A,HREF,NA,USER_CLASS_NAME,LAST_INDEX,COMMENTS_SPLITTER,
+    DISCUSS,TITLE,URL,AUTHOR,NUMBER_OF_COMMENTS,PAGE_NUMBER,OUTPUT_FILE_PATH,
+    WRITE_MODE,CSV_NEWLINE,LIST_START,ZERO_VALUE,HTML_TEXT_POINTS
+    )
+from utils import dbgprint, errprint
 
 #Temp: extract the data from locally downloaded html pages of the intended target site
-#TODO 1: Switch to lxml parser instead (suggested by BeautifulSoup documentation)
-#TODO 2: When working locally, swap to fetch from online and cache
 def local_parser(file_path):
+    #TODO: Switch to lxml parser instead of the default (suggested by BeautifulSoup documentation)
     dbgprint(f"Parsing for: {file_path}")
-    with open(file_path,"r",encoding="utf-8") as f:
+    with open(file_path,READ_MODE,encoding=UTF_8) as f:
         html = f.read()
-    return BeautifulSoup(html,"html.parser")
+    return BeautifulSoup(html,HTML_PARSER)
 
-def filter(unfiltered_data,min_score,max_score):
+def filter_posts(unfiltered_data,min_score,max_score):
     return [data_entry for data_entry in unfiltered_data if min_score <= data_entry[POINTS] <= max_score]
 
 def extract_from_soup(soup,p_num):
@@ -39,22 +32,23 @@ def extract_from_soup(soup,p_num):
 
         score_sp = soup.find(SPAN,id = "score_"+id)
         score = 0
-        num_comments = NA#might change to something else
+        num_comments = NA
         author_name = NA
         # author_link = NA
+
         #TODO: instead of checking for the missing score, it will be smarter to
         #check for missing "subline" class span(child of class="subtext" td - always present)
+
         if score_sp:# When score is missing, so is author and number of comments.
-            score = int(score_sp.get_text().split("points")[0].strip())
-            # print(f"score = {score}")
+            score = int(score_sp.get_text().split(HTML_TEXT_POINTS)[LIST_START].strip())
             score_parent = score_sp.parent
             user_a = score_parent.find(A,class_ = USER_CLASS_NAME)
             author_name = user_a.get_text()
             # author_link = user_a[HREF]
-            comments_str = score_parent.find_all("a")[-1].get_text()
+            comments_str = score_parent.find_all(A)[LAST_INDEX].get_text()
             try:
-                num_comments_str = comments_str.split(COMMENTS_SPLITTER)[0]#TODO: remove magic number
-                num_comments = 0 if(num_comments_str == DISCUSS) else int(num_comments_str)
+                num_comments_str = comments_str.split(COMMENTS_SPLITTER)[LIST_START]
+                num_comments = ZERO_VALUE if(num_comments_str == DISCUSS) else int(num_comments_str)
             except Exception as e:
                 errprint(e)
             
@@ -75,83 +69,8 @@ def save_to_csv(posts_list):
     os.makedirs(os.path.dirname(OUTPUT_FILE_PATH),exist_ok=True)
     fields = [TITLE,URL,AUTHOR,POINTS,NUMBER_OF_COMMENTS,PAGE_NUMBER]
 
-    is_file_exists = os.path.exists(OUTPUT_FILE_PATH) and os.path.getsize(OUTPUT_FILE_PATH) > 0
-
-    with open(OUTPUT_FILE_PATH,'a',newline='',encoding="utf-8") as csvfile:
+    with open(OUTPUT_FILE_PATH,WRITE_MODE,newline=CSV_NEWLINE,encoding=UTF_8) as csvfile:
         writer = csv.DictWriter(csvfile,fieldnames=fields)
-        if not is_file_exists:
-            writer.writeheader()
+        writer.writeheader()
         for post_dict in posts_list:
             writer.writerow(post_dict)
-
-def build_skip_pages(list_string):
-    return set([int(i.strip()) for i in list_string.split(",") if i.strip()])
-
-def validate_args(args):
-    num_post = args.num_post
-    min_score = args.min_score
-    max_score = args.max_score
-    list_string = args.list_string
-    if num_post < 0:
-        raise ValueError(ERR_NUM_POST_VALUE)
-    if(min_score < 0 or min_score <0):
-        raise ValueError(ERR_NON_POSITIVE_VALUE)
-    if(min_score>max_score):
-        raise ValueError(ERR_MIN_MAX_VALUE)
-    try:
-        pages = build_skip_pages(list_string)
-        dbgprint(pages)
-    except Exception as e:
-        raise ValueError(ERR_LIST_FORMAT)
-    
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--num_post",type=int,default=DEFAULT_NUM_POST,help=HELP_NUM_POST)
-    parser.add_argument("--min_score",type=int,default=DEAULT_MIN_SCORE,help=HELP_MIN_SCORE)
-    parser.add_argument("--max_score",type=int,default=DEFAULT_MAX_SCORE,help=HELP_MAX_SCORE)
-    parser.add_argument("--list_string",type=str,default=DEFAULT_SKIP_PAGES_STR,help=HELP_SKIP_PAGES)
-    parser.add_argument("--debug",action=STORE_TRUE,help=HELP_DEBUG)
-    return parser.parse_args()
-
-
-if __name__ == "__main__":
-    args = parse_args()
-    if args.debug:
-        debug_mode = args.debug
-    try:
-        validate_args(args)
-        dbgprint("DEBUG MODE ON!")
-        s = args.list_string
-        skip_pages = pages = build_skip_pages(args.list_string)
-        dbgprint(f"The skip_pages are: {skip_pages}")
-    except Exception as e:
-        errprint(f"something went wrong with argument parsing: {e}")
-        sys.exit(1)
-
-    dbgprint("After argument parsing...")
-    print(MSG_SCRAPING)
-    extracted_data = []
-    filtered_post_count = 0
-    try:
-        i = START
-        while  i < EOF_MOCK:
-            if i not in skip_pages:
-                i_soup = local_parser(STATIC_FILE_PATH+"/"+str(i)+HTML_SUFFIX)
-                remaining = args.num_post - filtered_post_count
-                filtered_data = filter(extract_from_soup(i_soup,i),args.min_score,args.max_score)
-                limited_data = filtered_data[:remaining]
-                filtered_post_count += len(limited_data)
-                extracted_data.extend(limited_data)
-            i+=1
-    except Exception as e:
-        errprint(f"Error during scraping: {e}")
-        sys.exit(1)
-
-    print(MSG_WRITING_TO_CSV)
-    try:
-        save_to_csv(extracted_data)
-    except Exception as e:
-        errprint(f"Saving to CSV failed: {e}")
-        sys.exit(1)
-    print(MSG_DONE)

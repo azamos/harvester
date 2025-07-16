@@ -9,6 +9,7 @@ DISCUSS = "discuss"
 LIST_START = 0
 START = 1
 EOF_MOCK = 21 # Locally downloaded 20 pages
+LAST_INDEX = -1
 
 # HTML fields and elements
 HREF="href"
@@ -17,6 +18,7 @@ ID="id"
 SPAN="span"
 A="a"
 COMMENTS_SPLITTER = "\xa0"
+HTML_TEXT_POINTS = "points"
 
 # CSV field names
 TITLE = "Title"
@@ -25,6 +27,10 @@ POINTS = "Points"
 AUTHOR = "Author"
 NUMBER_OF_COMMENTS = "Number of comments"
 PAGE_NUMBER = "Page number"
+
+# Defailt field values
+ZERO_VALUE = 0
+NA = "NA"
 
 # Default values for program arguments
 DEFAULT_NUM_POST = 150
@@ -56,6 +62,12 @@ ERR_NON_POSITIVE_VALUE = "scores must be at least 0"
 ERR_MIN_MAX_VALUE = "min_score must be <= max_score"
 ERR_LIST_FORMAT = "list must be in the format of int,int,..."
 
+# Encoding and Writing Modes
+UTF_8 = "utf-8"
+READ_MODE = "r"
+WRITE_MODE = "w"
+CSV_NEWLINE = ''
+
 # Other magic strings
-NA = "NA"
 STORE_TRUE = "store_true"
+HTML_PARSER = "html.parser"
