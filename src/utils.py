@@ -1,7 +1,8 @@
-from constants import (
+from .constants import (
     ERR_NUM_POST_VALUE,ERR_NON_POSITIVE_VALUE,ERR_MIN_MAX_VALUE,ERR_LIST_FORMAT,DEFAULT_NUM_POST,
     HELP_NUM_POST,DEAULT_MIN_SCORE,HELP_MIN_SCORE,DEFAULT_MAX_SCORE,HELP_MAX_SCORE,
-    DEFAULT_SKIP_PAGES_STR,HELP_SKIP_PAGES,STORE_TRUE,HELP_DEBUG
+    DEFAULT_SKIP_PAGES_STR,HELP_SKIP_PAGES,STORE_TRUE,HELP_DEBUG,COMMA,DASH,NOT_FOUND,
+    ERR_LIST_MISSING_NUMBER,LENGTH_RANGE_STR,BOTTOM_INDEX,TOP_INDEX
     )
 import argparse
 
@@ -12,8 +13,29 @@ def dbgprint(msg,debug_mode = False):
 def errprint(msg):
     print(f"[ERROR] {msg}")
 
+# Expects a string of comma seperated numbers and/or ranges. Duplicates and whitspaces supported.
+# e.g. "    5, 3,7, 2-6, 5  -8 ,9" is fine and will result in the set {2,...,9} 
 def build_skip_pages(list_string):
-    return set([int(i.strip()) for i in list_string.split(",") if i.strip()])
+    skip_set = set()
+    if not list_string.split():
+        return skip_set
+    
+    splitted = list_string.split(COMMA)
+    for raw_str in splitted:
+        str = raw_str.strip()
+        if not str:
+            raise ValueError(ERR_LIST_MISSING_NUMBER)
+        if str.find(DASH)==NOT_FOUND:
+            skip_set.add(int(str))# if not valid int, should raise a ValueError in the next format:
+                                  # "invalid literal for int() with base 10: '<str>'"
+        else:
+            further_split = str.split(DASH)
+            if len(further_split) != LENGTH_RANGE_STR:
+                raise ValueError(ERR_LIST_FORMAT)
+            range_bottom = int(further_split[BOTTOM_INDEX].strip())
+            range_top = int(further_split[TOP_INDEX].strip())
+            skip_set.update([i for i in range(range_bottom,range_top+1)])
+    return skip_set
 
 def validate_args(args,debug_mode = False):
     num_post = args.num_post
@@ -30,7 +52,7 @@ def validate_args(args,debug_mode = False):
         pages = build_skip_pages(list_string)
         dbgprint(pages,debug_mode)
     except Exception as e:
-        raise ValueError(ERR_LIST_FORMAT)
+        raise ValueError(e)
     
 
 def parse_args():

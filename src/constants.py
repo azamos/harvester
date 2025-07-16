@@ -61,6 +61,8 @@ ERR_NUM_POST_VALUE = "num_post must be >= 0 "
 ERR_NON_POSITIVE_VALUE = "scores must be at least 0"
 ERR_MIN_MAX_VALUE = "min_score must be <= max_score"
 ERR_LIST_FORMAT = "list must be in the format of int,int,..."
+ERR_LIST_MISSING_NUMBER = "Empty string where number should be"
+ERR_CONVERT_TO_INT = "invalid literal for int"
 
 # Encoding and Writing Modes
 UTF_8 = "utf-8"
@@ -68,6 +70,16 @@ READ_MODE = "r"
 WRITE_MODE = "w"
 CSV_NEWLINE = ''
 
-# Other magic strings
+# Characters
+COMMA = ","
+DASH = "-"
+
+# Symbolic Numbers and Strings
+NOT_FOUND = -1
+
+# Other magic numbers and strings
 STORE_TRUE = "store_true"
 HTML_PARSER = "html.parser"
+LENGTH_RANGE_STR = 2
+BOTTOM_INDEX = 0
+TOP_INDEX = 1

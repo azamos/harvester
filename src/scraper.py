@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 import os
-from constants import (
+from .constants import (
     UTF_8,READ_MODE,HTML_PARSER,POINTS,TR_CLASS_NAME,TR,TR_CLASS_NAME,ID,SPAN,
     TITLE_A_CLASS_NAME,A,HREF,NA,USER_CLASS_NAME,LAST_INDEX,COMMENTS_SPLITTER,
     DISCUSS,TITLE,URL,AUTHOR,NUMBER_OF_COMMENTS,PAGE_NUMBER,OUTPUT_FILE_PATH,
