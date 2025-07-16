@@ -26,14 +26,17 @@ def build_skip_pages(list_string):
         if not str:
             raise ValueError(ERR_LIST_MISSING_NUMBER)
         if str.find(DASH)==NOT_FOUND:
-            skip_set.add(int(str))# if not valid int, should raise a ValueError in the next format:
-                                  # "invalid literal for int() with base 10: '<str>'"
+            skip_set.add(int(str))# if not valid int, will raise its default ValueError
         else:
             further_split = str.split(DASH)
             if len(further_split) != LENGTH_RANGE_STR:
                 raise ValueError(ERR_LIST_FORMAT)
             range_bottom = int(further_split[BOTTOM_INDEX].strip())
             range_top = int(further_split[TOP_INDEX].strip())
+            if range_bottom > range_top:
+                temp = range_top
+                range_top = range_bottom
+                range_bottom = temp
             skip_set.update([i for i in range(range_bottom,range_top+1)])
     return skip_set
 
