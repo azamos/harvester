@@ -10,8 +10,9 @@ TR_CLASS_NAME = "athing submission"
 TITLE_A_CLASS_NAME = "titleline"
 USER_CLASS_NAME = "hnuser"
 
+LIST_START = 0
 START = 1
-EOF_MOCK = 6
+EOF_MOCK = 21 # Locally downloaded 20 pages
 
 debug_mode = False
 
@@ -34,10 +35,10 @@ AUTHOR = "Author"
 NUMBER_OF_COMMENTS = "Number of comments"
 PAGE_NUMBER = "Page number"
 
-DEFAULT_NUM_POST = 50
+DEFAULT_NUM_POST = 150
 DEAULT_MIN_SCORE = 0
-DEFAULT_MAX_SCORE = 10000
-DEFAULT_SKIP_PAGES = {}
+DEFAULT_MAX_SCORE = 1000000
+DEFAULT_SKIP_PAGES_STR = ""
 
 STATIC_FILE_PATH = "./htmlTestPages"
 OUTPUT_FILE_PATH = "./output/result.csv"
@@ -45,10 +46,17 @@ HTM_SUFFIX = ".htm"
 HTML_SUFFIX = ".html"
 
 HELP_NUM_POST = "Maximum numbers of posts to scrape"
-HELP_MIN_SCORE = "Filter: score >= "
-HELP_MAX_SCORE = "Filter: score <="
-HELP_SKIP_PAGES = "Specify a list of pages to skip, in the format --pages = p1,p2,p3"
-HELP_DEBUG = "Allows debug mode"
+HELP_MIN_SCORE = "Minimal score(for filtering). Must be >= 0"
+HELP_MAX_SCORE = "Maximal score(for filtering). Must be >= max(0, min_score)"
+HELP_SKIP_PAGES = "Specify a list of pages to skip, in the format --pages = int,int,int,..."
+HELP_DEBUG = "Allows debug mode printing"
+
+STORE_TRUE = "store_true"
+
+# User messages
+MSG_SCRAPING = "Scraping"
+MSG_WRITING_TO_CSV = "Writing data to csv..."
+MSG_DONE = "Done."
 
 def dbgprint(msg):
     if(debug_mode):
@@ -83,7 +91,7 @@ def extract_from_soup(soup,p_num):
 
         #TODO: efficiency maybe can be improved by using parent or next
         score_sp = soup.find(SPAN,id = "score_"+id)
-        score = 0#NA bad
+        score = 0
         num_comments = NA#might change to something else
         author_name = NA
         author_link = NA
@@ -128,6 +136,9 @@ def save_to_csv(posts_list):
         for post_dict in posts_list:
             writer.writerow(post_dict)
 
+def build_skip_pages(list_string):
+    return set([int(i.strip()) for i in list_string.split(",") if i.strip()])
+
 def validate_args(args):
     num_post = args.num_post
     min_score = args.min_score
@@ -140,8 +151,8 @@ def validate_args(args):
     if(min_score>max_score):
         raise ValueError("min_score must be <= max_score")
     try:
-        pages = set([int(i.strip()) for i in list_string.split(",") if i.strip()])
-        print(pages)#using print, since debug mode isn't set yet...
+        pages = build_skip_pages(list_string)
+        dbgprint(pages)
     except Exception as e:
         raise ValueError("list must be in the format of int,int,...")
     
@@ -151,48 +162,50 @@ def parse_args():
     parser.add_argument("--num_post",type=int,default=DEFAULT_NUM_POST,help=HELP_NUM_POST)
     parser.add_argument("--min_score",type=int,default=DEAULT_MIN_SCORE,help=HELP_MIN_SCORE)
     parser.add_argument("--max_score",type=int,default=DEFAULT_MAX_SCORE,help=HELP_MAX_SCORE)
-    parser.add_argument("--list_string",type=str,default="",help=HELP_SKIP_PAGES)
-    parser.add_argument("--debug",action="store_true",help=HELP_DEBUG)
+    parser.add_argument("--list_string",type=str,default=DEFAULT_SKIP_PAGES_STR,help=HELP_SKIP_PAGES)
+    parser.add_argument("--debug",action=STORE_TRUE,help=HELP_DEBUG)
     return parser.parse_args()
 
 
 
 if __name__ == "__main__":
-    print("Trying to prase arguments...")
     args = parse_args()
+    if args.debug:
+        debug_mode = args.debug
     try:
         validate_args(args)
-        debug_mode = args.debug
         dbgprint("DEBUG MODE ON!")
         s = args.list_string
-        skip_pages = set([int(i.strip()) for i in s.split(",") if i.strip()])
-        dbgprint(f"The skip list is: {skip_pages}")
+        skip_pages = pages = build_skip_pages(args.list_string)
+        dbgprint(f"The skip_pages are: {skip_pages}")
     except Exception as e:
         errprint(f"something went wrong with argument parsing: {e}")
         sys.exit(1)
 
     dbgprint("After argument parsing...")
+    print(MSG_SCRAPING)
     extracted_data = []
     filtered_post_count = 0
-    try:#TODO: need to add skipping the pages specified in skip_pages
+    try:
         i = START
         while  i < EOF_MOCK:
-            i_soup = local_parser(STATIC_FILE_PATH+"/"+str(i)+HTM_SUFFIX)
-            remaining = args.num_post - filtered_post_count
-            filtered_data = filter(extract_from_soup(i_soup,i),args.min_score,args.max_score)
-            limited_data = filtered_data[:remaining]
-            filtered_post_count += len(limited_data)
-            extracted_data.extend(limited_data)
+            if i not in skip_pages:
+                i_soup = local_parser(STATIC_FILE_PATH+"/"+str(i)+HTML_SUFFIX)
+                remaining = args.num_post - filtered_post_count
+                filtered_data = filter(extract_from_soup(i_soup,i),args.min_score,args.max_score)
+                limited_data = filtered_data[:remaining]
+                filtered_post_count += len(limited_data)
+                extracted_data.extend(limited_data)
             i+=1
     except Exception as e:
         errprint(f"Error during scraping: {e}")
         sys.exit(1)
 
     # dbgprint(f"Extracted data: {extracted_data}")
-    print("Writing data to csv...")
+    print(MSG_WRITING_TO_CSV)
     try:
         save_to_csv(extracted_data)
     except Exception as e:
         errprint(f"Saving to CSV failed: {e}")
         sys.exit(1)
-    print("DONE")
+    print(MSG_DONE)
