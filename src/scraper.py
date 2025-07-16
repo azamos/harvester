@@ -4,59 +4,9 @@ import csv
 import argparse
 import os
 import sys
-
-SOURCE_URL = "https://news.ycombinator.com/"
-TR_CLASS_NAME = "athing submission"
-TITLE_A_CLASS_NAME = "titleline"
-USER_CLASS_NAME = "hnuser"
-
-LIST_START = 0
-START = 1
-EOF_MOCK = 21 # Locally downloaded 20 pages
+from constants import *
 
 debug_mode = False
-
-NA = "NA"
-DISCUSS = "discuss"
-
-#HTML fields and elements
-HREF="href"
-TR="tr"
-ID="id"
-SPAN="span"
-A="a"
-COMMENTS_SPLITTER = "\xa0"
-
-#fields/features names
-TITLE = "Title"
-URL = "URL"
-POINTS = "Points"
-AUTHOR = "Author"
-NUMBER_OF_COMMENTS = "Number of comments"
-PAGE_NUMBER = "Page number"
-
-DEFAULT_NUM_POST = 150
-DEAULT_MIN_SCORE = 0
-DEFAULT_MAX_SCORE = 1000000
-DEFAULT_SKIP_PAGES_STR = ""
-
-STATIC_FILE_PATH = "./htmlTestPages"
-OUTPUT_FILE_PATH = "./output/result.csv"
-HTM_SUFFIX = ".htm"
-HTML_SUFFIX = ".html"
-
-HELP_NUM_POST = "Maximum numbers of posts to scrape"
-HELP_MIN_SCORE = "Minimal score(for filtering). Must be >= 0"
-HELP_MAX_SCORE = "Maximal score(for filtering). Must be >= max(0, min_score)"
-HELP_SKIP_PAGES = "Specify a list of pages to skip, in the format --pages = int,int,int,..."
-HELP_DEBUG = "Allows debug mode printing"
-
-STORE_TRUE = "store_true"
-
-# User messages
-MSG_SCRAPING = "Scraping"
-MSG_WRITING_TO_CSV = "Writing data to csv..."
-MSG_DONE = "Done."
 
 def dbgprint(msg):
     if(debug_mode):
@@ -86,15 +36,12 @@ def extract_from_soup(soup,p_num):
         title_a = title_td.find(A)
         title = title_a.get_text()
         url = title_a[HREF]
-        # sibling = tr.next
-        # print(sibling)
 
-        #TODO: efficiency maybe can be improved by using parent or next
         score_sp = soup.find(SPAN,id = "score_"+id)
         score = 0
         num_comments = NA#might change to something else
         author_name = NA
-        author_link = NA
+        # author_link = NA
         #TODO: instead of checking for the missing score, it will be smarter to
         #check for missing "subline" class span(child of class="subtext" td - always present)
         if score_sp:# When score is missing, so is author and number of comments.
@@ -103,7 +50,7 @@ def extract_from_soup(soup,p_num):
             score_parent = score_sp.parent
             user_a = score_parent.find(A,class_ = USER_CLASS_NAME)
             author_name = user_a.get_text()
-            author_link = user_a[HREF]
+            # author_link = user_a[HREF]
             comments_str = score_parent.find_all("a")[-1].get_text()
             try:
                 num_comments_str = comments_str.split(COMMENTS_SPLITTER)[0]#TODO: remove magic number
@@ -116,7 +63,8 @@ def extract_from_soup(soup,p_num):
             {
             TITLE:title,
             URL: url,
-            AUTHOR:{"name":author_name,"url":author_link},
+            AUTHOR: author_name,
+            # AUTHOR:{"name":author_name,"url":author_link},
             POINTS: score,
             NUMBER_OF_COMMENTS: num_comments,
             PAGE_NUMBER: p_num
@@ -145,16 +93,16 @@ def validate_args(args):
     max_score = args.max_score
     list_string = args.list_string
     if num_post < 0:
-        raise ValueError("num_post must be >= 0 ")
+        raise ValueError(ERR_NUM_POST_VALUE)
     if(min_score < 0 or min_score <0):
-        raise ValueError("scores must be at least 0")
+        raise ValueError(ERR_NON_POSITIVE_VALUE)
     if(min_score>max_score):
-        raise ValueError("min_score must be <= max_score")
+        raise ValueError(ERR_MIN_MAX_VALUE)
     try:
         pages = build_skip_pages(list_string)
         dbgprint(pages)
     except Exception as e:
-        raise ValueError("list must be in the format of int,int,...")
+        raise ValueError(ERR_LIST_FORMAT)
     
 
 def parse_args():
@@ -165,7 +113,6 @@ def parse_args():
     parser.add_argument("--list_string",type=str,default=DEFAULT_SKIP_PAGES_STR,help=HELP_SKIP_PAGES)
     parser.add_argument("--debug",action=STORE_TRUE,help=HELP_DEBUG)
     return parser.parse_args()
-
 
 
 if __name__ == "__main__":
@@ -201,7 +148,6 @@ if __name__ == "__main__":
         errprint(f"Error during scraping: {e}")
         sys.exit(1)
 
-    # dbgprint(f"Extracted data: {extracted_data}")
     print(MSG_WRITING_TO_CSV)
     try:
         save_to_csv(extracted_data)
