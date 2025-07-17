@@ -86,3 +86,4 @@ TOP_INDEX = 1
 OP_IS_SUCCESSUL = 'op_is_successful'
 RESULT_KEY = "result"
 POSTS_PER_PAGE = 30
+ONE = 1
