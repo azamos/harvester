@@ -64,6 +64,7 @@ ERR_MIN_MAX_VALUE = "min_score must be <= max_score"
 ERR_LIST_FORMAT = "list must be in the format of int,int,..."
 ERR_LIST_MISSING_NUMBER = "Empty string where number should be"
 ERR_CONVERT_TO_INT = "invalid literal for int"
+ERR_MISSING_FIELDS = "dict contains fields not in fieldnames"
 
 # Encoding and Writing Modes
 UTF_8 = "utf-8"

@@ -2,9 +2,10 @@ import pytest
 from src.constants import (
     READ_MODE,UTF_8,STATIC_FILE_PATH,HTML_SUFFIX,TR,TR_CLASS_NAME,
     SPAN, TITLE_A_CLASS_NAME,START,POSTS_PER_PAGE,ONE,
-    TITLE,URL,AUTHOR,POINTS,NUMBER_OF_COMMENTS,PAGE_NUMBER,EMPTY_STR
+    TITLE,URL,AUTHOR,POINTS,NUMBER_OF_COMMENTS,PAGE_NUMBER,EMPTY_STR,
+    OUTPUT_FILE_PATH,ERR_MISSING_FIELDS
     )
-from src.scraper import parser,filter_posts,extract_from_soup
+from src.scraper import parser,filter_posts,extract_from_soup,save_to_csv
 def local_parser(file_path):
     #TODO: Switch to lxml parser instead of the default (suggested by BeautifulSoup documentation)
     with open(file_path,READ_MODE,encoding=UTF_8) as f:
@@ -82,3 +83,38 @@ def test_extract_from_soup_invalid():
     slashdot_soup = local_parser("./tests/data/invalid/slashdot.html")
     slashdot_result = extract_from_soup(slashdot_soup,1)
     assert len(slashdot_result)==0
+
+def test_save_to_csv_valid():
+    p1 = {
+        TITLE:"title1",URL: "test1@test.com",AUTHOR: "author1",POINTS: 100,
+        NUMBER_OF_COMMENTS: 25,PAGE_NUMBER: 1
+        }
+    p2 = {
+        TITLE:"title2",URL: "test2@test.com",AUTHOR: "author2",POINTS: 99,
+        NUMBER_OF_COMMENTS: 25,PAGE_NUMBER: 1
+        }
+    p3 = {
+        TITLE:"title3",URL: "test3@test.com",AUTHOR: "author3",POINTS: 105,
+        NUMBER_OF_COMMENTS: 25,PAGE_NUMBER: 1
+        }
+    p4 = {
+        TITLE:"title4",URL: "test4@test.com",AUTHOR: '',POINTS: '',
+        NUMBER_OF_COMMENTS: 25,PAGE_NUMBER: 1
+        }
+    posts = [p1,p2,p3,p4]
+    save_to_csv(posts) # saves to OUTPUT_FILE_PATH
+    with open(OUTPUT_FILE_PATH,READ_MODE,encoding=UTF_8) as f:
+        lines = f.readlines()
+        assert len(lines) == 5
+        assert lines[0].strip() == f"{TITLE},{URL},{AUTHOR},{POINTS},{NUMBER_OF_COMMENTS},{PAGE_NUMBER}"
+    empty_posts = []
+    save_to_csv(empty_posts) # saves to OUTPUT_FILE_PATH
+    with open(OUTPUT_FILE_PATH,READ_MODE,encoding=UTF_8) as f:
+        lines = f.readlines()
+        assert len(lines) == 1
+        assert lines[0].strip() == f"{TITLE},{URL},{AUTHOR},{POINTS},{NUMBER_OF_COMMENTS},{PAGE_NUMBER}"
+
+def test_save_to_csv_invalid():
+    malformed_post = {"Wrong Key":5,"Another Wrong Key":"test"}
+    with pytest.raises(ValueError,match=ERR_MISSING_FIELDS):
+        save_to_csv([malformed_post])
