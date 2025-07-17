@@ -16,6 +16,9 @@ def local_parser(file_path):
     dbgprint(f"Parsing for: {file_path}")
     with open(file_path,READ_MODE,encoding=UTF_8) as f:
         html = f.read()
+    return parser(html)
+
+def parser(html):
     return BeautifulSoup(html,HTML_PARSER)
 
 def filter_posts(unfiltered_data,min_score,max_score):
@@ -23,6 +26,7 @@ def filter_posts(unfiltered_data,min_score,max_score):
 
 def extract_from_soup(soup,p_num):
     extracted_data = []
+    print(len(soup.find_all(TR, class_ = TR_CLASS_NAME)))
     for tr in soup.find_all(TR, class_ = TR_CLASS_NAME):
         id = tr[ID]
         title_td = tr.find(SPAN,class_ = TITLE_A_CLASS_NAME)
