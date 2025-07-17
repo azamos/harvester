@@ -6,6 +6,7 @@ from src.constants import (
     OUTPUT_FILE_PATH,ERR_MISSING_FIELDS
     )
 from src.scraper import parser,filter_posts,extract_from_soup,save_to_csv
+
 def local_parser(file_path):
     #TODO: Switch to lxml parser instead of the default (suggested by BeautifulSoup documentation)
     with open(file_path,READ_MODE,encoding=UTF_8) as f:

@@ -6,13 +6,22 @@ from .constants import (
     UTF_8,READ_MODE,HTML_PARSER,POINTS,TR_CLASS_NAME,TR,TR_CLASS_NAME,ID,SPAN,
     TITLE_A_CLASS_NAME,A,HREF,EMPTY_STR,USER_CLASS_NAME,LAST_INDEX,COMMENTS_SPLITTER,
     DISCUSS,TITLE,URL,AUTHOR,NUMBER_OF_COMMENTS,PAGE_NUMBER,OUTPUT_FILE_PATH,
-    WRITE_MODE,CSV_NEWLINE,LIST_START,ZERO_VALUE,HTML_TEXT_POINTS,SCORE_PREFIX,
+    WRITE_MODE,CSV_NEWLINE,LIST_START,ZERO_VALUE,HTML_TEXT_POINTS,SCORE_PREFIX,DEFAULT_TIMEOUT
     )
 from .utils import dbgprint, errprint
 
+def fetch_page(url):
+    try:
+        reponse = requests.get(url,timeout=DEFAULT_TIMEOUT)
+        reponse.raise_for_status()
+        return reponse.text
+    except requests.RequestException as e:
+        errprint(e)
+        return None
+
+
 #Temp: extract the data from locally downloaded html pages of the intended target site
 def local_parser(file_path):
-    #TODO: Switch to lxml parser instead of the default (suggested by BeautifulSoup documentation)
     dbgprint(f"Parsing for: {file_path}")
     with open(file_path,READ_MODE,encoding=UTF_8) as f:
         html = f.read()

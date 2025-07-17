@@ -1,5 +1,5 @@
 # Hackernews specific attributes
-SOURCE_URL = "https://news.ycombinator.com/"
+SOURCE_URL = "https://news.ycombinator.com/?p="
 TR_CLASS_NAME = "athing submission"
 TITLE_A_CLASS_NAME = "titleline"
 USER_CLASS_NAME = "hnuser"
@@ -89,3 +89,5 @@ OP_IS_SUCCESSUL = 'op_is_successful'
 RESULT_KEY = "result"
 POSTS_PER_PAGE = 30
 ONE = 1
+DEFAULT_TIMEOUT = 5
+MAX_SAFES_POSTS = 900
