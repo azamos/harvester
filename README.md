@@ -1,6 +1,6 @@
 # Harvester
 
-A Python-based web scraper for extracting post data from hacker news (https://news.ycombinator.com/) into a CSV.
+A Python-based web scraper for extracting post data from Hacker News (https://news.ycombinator.com/) into a CSV.
 
 ## Requirements
 
@@ -57,11 +57,17 @@ python -m src.main --num_post NUM_POST --min_score MIN_SCORE --max_score MAX_SCO
 - `--min_score`: Minimum score threshold (non-negative integer)
 - `--max_score`: Maximum score threshold (non-negative integer, must be >= min_score)
 - `--list_string`: Comma-separated list of positive integers (duplicates allowed)
+  - No spaces: `1,2,3`
+  - With spaces: `"1, 2, 3"` (quotes required)
 
 ### Example Usage
 
 ```bash
-python -m src.main --num_post 50 --min_score 100 --max_score 200 --list_string 1,2,3
+# Without spaces in list_string
+python -m src.main --num_post 50 --min_score 0 --max_score 1000 --list_string 1,2,3
+
+# With spaces in list_string (quotes required)
+python -m src.main --num_post 50 --min_score 0 --max_score 1000 --list_string "1, 2 , 3 - 5"
 ```
 
 ### Debug Mode
@@ -69,15 +75,32 @@ python -m src.main --num_post 50 --min_score 100 --max_score 200 --list_string 1
 To view debug output, add the `--debug` flag:
 
 ```bash
-python -m src.main --num_post 50 --min_score 100 --max_score 200 --list_string 1,2,3 --debug
+# Without spaces
+python -m src.main --num_post 50 --min_score 0 --max_score 1000 --list_string 1,2,3 --debug
+
+# With spaces (quotes required)
+python -m src.main --num_post 50 --min_score 0 --max_score 1000 --list_string "1, 2, 3" --debug
 ```
 
 ## Dependencies
 
 - `requests` - For making HTTP requests
 - `beautifulsoup4` - For HTML parsing
+- `pytest` - For unit testing
 
 ## Sample Output
+
+### CSV Output Example
+
+A sample CSV output file is available at [`sampleOutput/result.csv`](sampleOutput/result.csv).
+
+This sample was generated using the following command:
+
+```bash
+python -m src.main --num_post 100 --min_score 0 --max_score 200000 --list_string 5,10-4,1-3 --debug
+```
+
+### Visual Comparison
 
 Below is a screenshot comparing the original Hacker News page and the extracted CSV output:
 
