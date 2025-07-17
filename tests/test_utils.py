@@ -1,7 +1,9 @@
 import pytest
 import argparse
-from src.utils import build_skip_pages,validate_args
-from src.constants import ERR_LIST_FORMAT,ERR_CONVERT_TO_INT, ERR_LIST_MISSING_NUMBER
+from src.utils import build_skip_pages,validate_args,parse_args
+from src.constants import (
+    ERR_LIST_FORMAT,ERR_CONVERT_TO_INT, ERR_LIST_MISSING_NUMBER,
+    DEFAULT_NUM_POST,DEAULT_MIN_SCORE,DEFAULT_MAX_SCORE,DEFAULT_SKIP_PAGES_STR)
 
 INV_L_1 = " 12, 1-5, , 5" # Should raise ERR_LIST_MISSING_NUMBER ValueError
 INV_L_2 = "12, 1-5, X, 3" # Should raise ERR_CONVERT_TO_INT ValueError
@@ -194,3 +196,42 @@ def test_validate_args_invalid():
     assert validate_args(args=args10)==False
     assert validate_args(args=args11)==False
     assert validate_args(args=args12)==False
+
+def test_parse_args_valid():
+    args1 = parse_args(["--num_post","100","--min_score","200","--max_score","300",
+                       "--list_string","    5,5,6   ,6,1- 6",
+                       "--debug"])
+    assert args1.num_post == 100
+    assert args1.min_score == 200
+    assert args1.max_score == 300
+    assert args1.list_string == "    5,5,6   ,6,1- 6"
+    assert args1.debug == True
+
+    args2 = parse_args(["--num_post","0","--min_score","5","--max_score","3",
+                       "--list_string","    "])
+    assert args2.num_post == 0
+    assert args2.min_score == 5
+    assert args2.max_score == 3
+    assert args2.list_string == "    "
+    assert args2.debug == False
+
+    args3 = parse_args([])
+    assert args3.num_post == DEFAULT_NUM_POST
+    assert args3.min_score == DEAULT_MIN_SCORE
+    assert args3.max_score == DEFAULT_MAX_SCORE
+    assert args3.list_string == DEFAULT_SKIP_PAGES_STR
+    assert args3.debug == False
+
+def test_parse_args_invalid():
+    args1 = ["--num_post","3.5"]
+    args2 = ["--num_post","NaN"]
+    args3 = ["--num_posts","5"]
+    args4 = ["--num_post"]
+    with pytest.raises(SystemExit):
+        parse_args(args1)
+    with pytest.raises(SystemExit):
+        parse_args(args2)
+    with pytest.raises(SystemExit):
+        parse_args(args3)
+    with pytest.raises(SystemExit):
+        parse_args(args4)

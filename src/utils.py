@@ -62,11 +62,11 @@ def validate_args(args,debug_mode = False):
     return True
     
 
-def parse_args():
+def parse_args(args=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--num_post",type=int,default=DEFAULT_NUM_POST,help=HELP_NUM_POST)
     parser.add_argument("--min_score",type=int,default=DEAULT_MIN_SCORE,help=HELP_MIN_SCORE)
     parser.add_argument("--max_score",type=int,default=DEFAULT_MAX_SCORE,help=HELP_MAX_SCORE)
     parser.add_argument("--list_string",type=str,default=DEFAULT_SKIP_PAGES_STR,help=HELP_SKIP_PAGES)
     parser.add_argument("--debug",action=STORE_TRUE,help=HELP_DEBUG)
-    return parser.parse_args()
+    return parser.parse_args(args)
