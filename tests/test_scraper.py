@@ -2,9 +2,9 @@ import pytest
 from src.constants import (
     READ_MODE,UTF_8,STATIC_FILE_PATH,HTML_SUFFIX,TR,TR_CLASS_NAME,
     SPAN, TITLE_A_CLASS_NAME,START,POSTS_PER_PAGE,ONE,
-    TITLE,URL,AUTHOR,POINTS,NUMBER_OF_COMMENTS,PAGE_NUMBER
+    TITLE,URL,AUTHOR,POINTS,NUMBER_OF_COMMENTS,PAGE_NUMBER,EMPTY_STR
     )
-from src.scraper import parser,filter_posts
+from src.scraper import parser,filter_posts,extract_from_soup
 def local_parser(file_path):
     #TODO: Switch to lxml parser instead of the default (suggested by BeautifulSoup documentation)
     with open(file_path,READ_MODE,encoding=UTF_8) as f:
@@ -12,7 +12,7 @@ def local_parser(file_path):
     return parser(html)
 
 def test_scrapper_locally_valid():
-    soup = local_parser(STATIC_FILE_PATH+"/"+str(START)+HTML_SUFFIX)
+    soup = local_parser("./tests/data/hackernews/1.html")
     assert soup.find("body") is not None
     assert len(soup.find_all(TR, class_ = TR_CLASS_NAME))==POSTS_PER_PAGE
     assert len(soup.find_all(SPAN,class_ = TITLE_A_CLASS_NAME))==POSTS_PER_PAGE
@@ -60,4 +60,25 @@ def test_filter_posts_invalid():
         POINTS: 'Not a number',NUMBER_OF_COMMENTS: 25,PAGE_NUMBER: 1}]
     with pytest.raises(TypeError):
         filter_posts(posts)
-    
+
+def test_extract_from_soup_valid():
+    soup = local_parser(STATIC_FILE_PATH+"/"+str(START)+HTML_SUFFIX)
+    result = extract_from_soup(soup=soup,p_num=START)
+    expected_keys = {TITLE,URL,AUTHOR,POINTS,NUMBER_OF_COMMENTS,PAGE_NUMBER}
+    for post_data in result:
+        assert expected_keys.issubset(post_data.keys())
+        assert isinstance(post_data[TITLE],str)
+        assert isinstance(post_data[URL],str) and post_data[URL].startswith("http")
+        assert isinstance(post_data[AUTHOR],str)
+        if post_data[POINTS] != EMPTY_STR:
+            assert isinstance(post_data[POINTS],int) and post_data[POINTS]>=0
+        assert isinstance(post_data[NUMBER_OF_COMMENTS],int) and post_data[NUMBER_OF_COMMENTS]>=0
+        assert isinstance(post_data[PAGE_NUMBER],int) and post_data[PAGE_NUMBER]>=1
+
+def test_extract_from_soup_invalid():
+    reddit_soup = local_parser("./tests/data/invalid/reddit.html")
+    reddit_result = extract_from_soup(reddit_soup,1)
+    assert len(reddit_result)==0
+    slashdot_soup = local_parser("./tests/data/invalid/slashdot.html")
+    slashdot_result = extract_from_soup(slashdot_soup,1)
+    assert len(slashdot_result)==0

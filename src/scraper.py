@@ -26,7 +26,6 @@ def filter_posts(unfiltered_data,min_score,max_score):
 
 def extract_from_soup(soup,p_num):
     extracted_data = []
-    # print(len(soup.find_all(TR, class_ = TR_CLASS_NAME)))
     for tr in soup.find_all(TR, class_ = TR_CLASS_NAME):
         id = tr[ID]
         title_td = tr.find(SPAN,class_ = TITLE_A_CLASS_NAME)
