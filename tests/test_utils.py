@@ -200,11 +200,13 @@ def test_validate_args_invalid():
 def test_parse_args_valid():
     args1 = parse_args(["--num_post","100","--min_score","200","--max_score","300",
                        "--list_string","    5,5,6   ,6,1- 6",
+                       "--offline",
                        "--debug"])
     assert args1.num_post == 100
     assert args1.min_score == 200
     assert args1.max_score == 300
     assert args1.list_string == "    5,5,6   ,6,1- 6"
+    assert args1.offline == True
     assert args1.debug == True
 
     args2 = parse_args(["--num_post","0","--min_score","5","--max_score","3",
@@ -213,6 +215,7 @@ def test_parse_args_valid():
     assert args2.min_score == 5
     assert args2.max_score == 3
     assert args2.list_string == "    "
+    assert args2.offline == False
     assert args2.debug == False
 
     args3 = parse_args([])
@@ -220,6 +223,7 @@ def test_parse_args_valid():
     assert args3.min_score == DEAULT_MIN_SCORE
     assert args3.max_score == DEFAULT_MAX_SCORE
     assert args3.list_string == DEFAULT_SKIP_PAGES_STR
+    assert args3.offline == False
     assert args3.debug == False
 
 def test_parse_args_invalid():

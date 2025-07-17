@@ -1,8 +1,8 @@
 from .constants import (
-    ERR_NUM_POST_VALUE,ERR_NON_POSITIVE_VALUE,ERR_MIN_MAX_VALUE,ERR_LIST_FORMAT,DEFAULT_NUM_POST,
+    HELP_OFFLINE,ERR_LIST_FORMAT,DEFAULT_NUM_POST,
     HELP_NUM_POST,DEAULT_MIN_SCORE,HELP_MIN_SCORE,DEFAULT_MAX_SCORE,HELP_MAX_SCORE,
     DEFAULT_SKIP_PAGES_STR,HELP_SKIP_PAGES,STORE_TRUE,HELP_DEBUG,COMMA,DASH,NOT_FOUND,
-    ERR_LIST_MISSING_NUMBER,LENGTH_RANGE_STR,BOTTOM_INDEX,TOP_INDEX,OP_IS_SUCCESSUL,RESULT_KEY
+    ERR_LIST_MISSING_NUMBER,LENGTH_RANGE_STR,BOTTOM_INDEX,TOP_INDEX
     )
 import argparse
 
@@ -45,13 +45,10 @@ def validate_args(args,debug_mode = False):
     list_string = args.list_string
     if num_post < 0:
         return False
-        # raise ValueError(ERR_NUM_POST_VALUE)
     if(min_score < 0 or min_score <0):
         return False
-        # raise ValueError(ERR_NON_POSITIVE_VALUE)
     if(min_score>max_score):
         return False
-        # raise ValueError(ERR_MIN_MAX_VALUE)
     pages = None
     try:
         pages = build_skip_pages(list_string)
@@ -68,5 +65,6 @@ def parse_args(args=None):
     parser.add_argument("--min_score",type=int,default=DEAULT_MIN_SCORE,help=HELP_MIN_SCORE)
     parser.add_argument("--max_score",type=int,default=DEFAULT_MAX_SCORE,help=HELP_MAX_SCORE)
     parser.add_argument("--list_string",type=str,default=DEFAULT_SKIP_PAGES_STR,help=HELP_SKIP_PAGES)
+    parser.add_argument("--offline",action=STORE_TRUE,help=HELP_OFFLINE)
     parser.add_argument("--debug",action=STORE_TRUE,help=HELP_DEBUG)
     return parser.parse_args(args)

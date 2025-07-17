@@ -55,8 +55,6 @@ def test_filter_posts_valid():
     assert len(res2) == 3 and p4 not in res2
 
 def test_filter_posts_invalid():
-    # filter only cares about the score value. Since I only cover 2 cases: number or empty string,
-    # it should raise an error for other strings
     posts = [{
         TITLE:"title1",URL: "test1@test.com",AUTHOR: "author1",
         POINTS: 'Not a number',NUMBER_OF_COMMENTS: 25,PAGE_NUMBER: 1}]

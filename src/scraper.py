@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import csv
 import os
 from .constants import (
-    UTF_8,READ_MODE,HTML_PARSER,POINTS,TR_CLASS_NAME,TR,TR_CLASS_NAME,ID,SPAN,
+    UTF_8,HTML_PARSER,POINTS,TR_CLASS_NAME,TR,TR_CLASS_NAME,ID,SPAN,READ_MODE,
     TITLE_A_CLASS_NAME,A,HREF,EMPTY_STR,USER_CLASS_NAME,LAST_INDEX,COMMENTS_SPLITTER,
     DISCUSS,TITLE,URL,AUTHOR,NUMBER_OF_COMMENTS,PAGE_NUMBER,OUTPUT_FILE_PATH,
     WRITE_MODE,CSV_NEWLINE,LIST_START,ZERO_VALUE,HTML_TEXT_POINTS,SCORE_PREFIX,DEFAULT_TIMEOUT
@@ -20,7 +20,7 @@ def fetch_page(url):
         return None
 
 
-#Temp: extract the data from locally downloaded html pages of the intended target site
+# Used during development. Will be used when using --offline
 def local_parser(file_path):
     dbgprint(f"Parsing for: {file_path}")
     with open(file_path,READ_MODE,encoding=UTF_8) as f:
