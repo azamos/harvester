@@ -45,22 +45,22 @@
    An example usage(bash):
 
    ```bash
-   python src/main.py --num_post 50 --min_score 100 --max_score 200 --list_string 1,2,3
+   python -m src.main --num_post 50 --min_score 100 --max_score 200 --list_string 1,2,3
    ```
 
    # On Windows:
 
-   python src\main.py --num_post 50 --min_score 100 --max_score 200 --list_string 1,2,3
+   python -m src.main --num_post 50 --min_score 100 --max_score 200 --list_string 1,2,3
 
    If you wish to view debug printings, please add the --debug flag lastly, like this:
 
    ```bash
-   python src/main.py --num_post 50 --min_score 100 --max_score 200 --list_string 1,2,3 --debug
+   python -m src.main --num_post 50 --min_score 100 --max_score 200 --list_string 1,2,3 --debug
    ```
 
    # On Windows:
 
-   python src\main.py --num_post 50 --min_score 100 --max_score 200 --list_string 1,2,3 --debug
+   python -m src.main --num_post 50 --min_score 100 --max_score 200 --list_string 1,2,3 --debug
 
 ## Dependencies
 

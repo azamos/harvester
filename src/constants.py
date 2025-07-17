@@ -83,3 +83,5 @@ HTML_PARSER = "html.parser"
 LENGTH_RANGE_STR = 2
 BOTTOM_INDEX = 0
 TOP_INDEX = 1
+OP_IS_SUCCESSUL = 'op_is_successful'
+RESULT_KEY = "result"

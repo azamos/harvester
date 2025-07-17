@@ -1,6 +1,6 @@
 import sys
-from utils import parse_args,validate_args,dbgprint,errprint,build_skip_pages
-from scraper import local_parser,extract_from_soup,save_to_csv,filter_posts
+from .utils import parse_args,validate_args,dbgprint,errprint,build_skip_pages
+from .scraper import local_parser,extract_from_soup,save_to_csv,filter_posts
 from .constants import (
     MSG_SCRAPING,START,EOF_MOCK,STATIC_FILE_PATH,
     HTML_SUFFIX,MSG_WRITING_TO_CSV,MSG_DONE,ZERO_VALUE

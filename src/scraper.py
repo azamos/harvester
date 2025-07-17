@@ -8,7 +8,7 @@ from .constants import (
     DISCUSS,TITLE,URL,AUTHOR,NUMBER_OF_COMMENTS,PAGE_NUMBER,OUTPUT_FILE_PATH,
     WRITE_MODE,CSV_NEWLINE,LIST_START,ZERO_VALUE,HTML_TEXT_POINTS
     )
-from utils import dbgprint, errprint
+from .utils import dbgprint, errprint
 
 #Temp: extract the data from locally downloaded html pages of the intended target site
 def local_parser(file_path):

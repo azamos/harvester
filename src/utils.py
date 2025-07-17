@@ -2,7 +2,7 @@ from .constants import (
     ERR_NUM_POST_VALUE,ERR_NON_POSITIVE_VALUE,ERR_MIN_MAX_VALUE,ERR_LIST_FORMAT,DEFAULT_NUM_POST,
     HELP_NUM_POST,DEAULT_MIN_SCORE,HELP_MIN_SCORE,DEFAULT_MAX_SCORE,HELP_MAX_SCORE,
     DEFAULT_SKIP_PAGES_STR,HELP_SKIP_PAGES,STORE_TRUE,HELP_DEBUG,COMMA,DASH,NOT_FOUND,
-    ERR_LIST_MISSING_NUMBER,LENGTH_RANGE_STR,BOTTOM_INDEX,TOP_INDEX
+    ERR_LIST_MISSING_NUMBER,LENGTH_RANGE_STR,BOTTOM_INDEX,TOP_INDEX,OP_IS_SUCCESSUL,RESULT_KEY
     )
 import argparse
 
@@ -13,8 +13,6 @@ def dbgprint(msg,debug_mode = False):
 def errprint(msg):
     print(f"[ERROR] {msg}")
 
-# Expects a string of comma seperated numbers and/or ranges. Duplicates and whitspaces supported.
-# e.g. "    5, 3,7, 2-6, 5  -8 ,9" is fine and will result in the set {2,...,9} 
 def build_skip_pages(list_string):
     skip_set = set()
     if not list_string.split():
@@ -46,16 +44,22 @@ def validate_args(args,debug_mode = False):
     max_score = args.max_score
     list_string = args.list_string
     if num_post < 0:
-        raise ValueError(ERR_NUM_POST_VALUE)
+        return False
+        # raise ValueError(ERR_NUM_POST_VALUE)
     if(min_score < 0 or min_score <0):
-        raise ValueError(ERR_NON_POSITIVE_VALUE)
+        return False
+        # raise ValueError(ERR_NON_POSITIVE_VALUE)
     if(min_score>max_score):
-        raise ValueError(ERR_MIN_MAX_VALUE)
+        return False
+        # raise ValueError(ERR_MIN_MAX_VALUE)
+    pages = None
     try:
         pages = build_skip_pages(list_string)
         dbgprint(pages,debug_mode)
-    except Exception as e:
-        raise ValueError(e)
+    except ValueError as v_e:
+        errprint(v_e)
+        return False
+    return True
     
 
 def parse_args():
