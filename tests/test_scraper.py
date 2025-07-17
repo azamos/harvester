@@ -1,3 +1,4 @@
+import pytest
 from src.constants import (
     READ_MODE,UTF_8,STATIC_FILE_PATH,HTML_SUFFIX,TR,TR_CLASS_NAME,
     SPAN, TITLE_A_CLASS_NAME,START,POSTS_PER_PAGE,ONE,
@@ -28,7 +29,7 @@ def test_scrapper_invalid():
     soup3 = parser(invalid3)
     assert len(soup3.find_all())==1
 
-def test_filter_posts():
+def test_filter_posts_valid():
     p1 = {
         TITLE:"title1",URL: "test1@test.com",AUTHOR: "author1",POINTS: 100,
         NUMBER_OF_COMMENTS: 25,PAGE_NUMBER: 1
@@ -50,4 +51,13 @@ def test_filter_posts():
     assert len(res1) == 1 and res1[0] == p1
     res2 = filter_posts(posts,99,105)
     assert len(res2) == 3 and p4 not in res2
+
+def test_filter_posts_invalid():
+    # filter only cares about the score value. Since I only cover 2 cases: number or empty string,
+    # it should raise an error for other strings
+    posts = [{
+        TITLE:"title1",URL: "test1@test.com",AUTHOR: "author1",
+        POINTS: 'Not a number',NUMBER_OF_COMMENTS: 25,PAGE_NUMBER: 1}]
+    with pytest.raises(TypeError):
+        filter_posts(posts)
     
