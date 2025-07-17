@@ -1,8 +1,9 @@
 from src.constants import (
     READ_MODE,UTF_8,STATIC_FILE_PATH,HTML_SUFFIX,TR,TR_CLASS_NAME,
-    SPAN, TITLE_A_CLASS_NAME,START,POSTS_PER_PAGE,ONE
+    SPAN, TITLE_A_CLASS_NAME,START,POSTS_PER_PAGE,ONE,
+    TITLE,URL,AUTHOR,POINTS,NUMBER_OF_COMMENTS,PAGE_NUMBER
     )
-from src.scraper import parser
+from src.scraper import parser,filter_posts
 def local_parser(file_path):
     #TODO: Switch to lxml parser instead of the default (suggested by BeautifulSoup documentation)
     with open(file_path,READ_MODE,encoding=UTF_8) as f:
@@ -26,3 +27,27 @@ def test_scrapper_invalid():
     invalid3 = "<></><<>><html<body>content</body></html>"
     soup3 = parser(invalid3)
     assert len(soup3.find_all())==1
+
+def test_filter_posts():
+    p1 = {
+        TITLE:"title1",URL: "test1@test.com",AUTHOR: "author1",POINTS: 100,
+        NUMBER_OF_COMMENTS: 25,PAGE_NUMBER: 1
+        }
+    p2 = {
+        TITLE:"title2",URL: "test2@test.com",AUTHOR: "author2",POINTS: 99,
+        NUMBER_OF_COMMENTS: 25,PAGE_NUMBER: 1
+        }
+    p3 = {
+        TITLE:"title3",URL: "test3@test.com",AUTHOR: "author3",POINTS: 105,
+        NUMBER_OF_COMMENTS: 25,PAGE_NUMBER: 1
+        }
+    p4 = {
+        TITLE:"title4",URL: "test4@test.com",AUTHOR: '',POINTS: '',
+        NUMBER_OF_COMMENTS: 25,PAGE_NUMBER: 1
+        }
+    posts = [p1,p2,p3,p4]
+    res1 = filter_posts(posts,100,104)
+    assert len(res1) == 1 and res1[0] == p1
+    res2 = filter_posts(posts,99,105)
+    assert len(res2) == 3 and p4 not in res2
+    

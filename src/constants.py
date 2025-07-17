@@ -4,6 +4,7 @@ TR_CLASS_NAME = "athing submission"
 TITLE_A_CLASS_NAME = "titleline"
 USER_CLASS_NAME = "hnuser"
 DISCUSS = "discuss"
+SCORE_PREFIX = "score_"
 
 # Iteration constants
 LIST_START = 0
@@ -30,7 +31,7 @@ PAGE_NUMBER = "Page number"
 
 # Defailt field values
 ZERO_VALUE = 0
-NA = "NA"
+EMPTY_STR = ""
 
 # Default values for program arguments
 DEFAULT_NUM_POST = 150

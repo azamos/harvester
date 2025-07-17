@@ -4,9 +4,9 @@ import csv
 import os
 from .constants import (
     UTF_8,READ_MODE,HTML_PARSER,POINTS,TR_CLASS_NAME,TR,TR_CLASS_NAME,ID,SPAN,
-    TITLE_A_CLASS_NAME,A,HREF,NA,USER_CLASS_NAME,LAST_INDEX,COMMENTS_SPLITTER,
+    TITLE_A_CLASS_NAME,A,HREF,EMPTY_STR,USER_CLASS_NAME,LAST_INDEX,COMMENTS_SPLITTER,
     DISCUSS,TITLE,URL,AUTHOR,NUMBER_OF_COMMENTS,PAGE_NUMBER,OUTPUT_FILE_PATH,
-    WRITE_MODE,CSV_NEWLINE,LIST_START,ZERO_VALUE,HTML_TEXT_POINTS
+    WRITE_MODE,CSV_NEWLINE,LIST_START,ZERO_VALUE,HTML_TEXT_POINTS,SCORE_PREFIX,
     )
 from .utils import dbgprint, errprint
 
@@ -22,11 +22,11 @@ def parser(html):
     return BeautifulSoup(html,HTML_PARSER)
 
 def filter_posts(unfiltered_data,min_score,max_score):
-    return [data_entry for data_entry in unfiltered_data if min_score <= data_entry[POINTS] <= max_score]
+    return [data_entry for data_entry in unfiltered_data if data_entry[POINTS]!=EMPTY_STR and min_score <= data_entry[POINTS] <= max_score]
 
 def extract_from_soup(soup,p_num):
     extracted_data = []
-    print(len(soup.find_all(TR, class_ = TR_CLASS_NAME)))
+    # print(len(soup.find_all(TR, class_ = TR_CLASS_NAME)))
     for tr in soup.find_all(TR, class_ = TR_CLASS_NAME):
         id = tr[ID]
         title_td = tr.find(SPAN,class_ = TITLE_A_CLASS_NAME)
@@ -34,21 +34,16 @@ def extract_from_soup(soup,p_num):
         title = title_a.get_text()
         url = title_a[HREF]
 
-        score_sp = soup.find(SPAN,id = "score_"+id)
-        score = 0
-        num_comments = NA
-        author_name = NA
-        # author_link = NA
-
-        #TODO: instead of checking for the missing score, it will be smarter to
-        #check for missing "subline" class span(child of class="subtext" td - always present)
+        score_sp = soup.find(SPAN,id = SCORE_PREFIX+id)
+        score = EMPTY_STR
+        num_comments = ZERO_VALUE
+        author_name = EMPTY_STR
 
         if score_sp:# When score is missing, so is author and number of comments.
             score = int(score_sp.get_text().split(HTML_TEXT_POINTS)[LIST_START].strip())
             score_parent = score_sp.parent
             user_a = score_parent.find(A,class_ = USER_CLASS_NAME)
             author_name = user_a.get_text()
-            # author_link = user_a[HREF]
             comments_str = score_parent.find_all(A)[LAST_INDEX].get_text()
             try:
                 num_comments_str = comments_str.split(COMMENTS_SPLITTER)[LIST_START]
@@ -62,7 +57,6 @@ def extract_from_soup(soup,p_num):
             TITLE:title,
             URL: url,
             AUTHOR: author_name,
-            # AUTHOR:{"name":author_name,"url":author_link},
             POINTS: score,
             NUMBER_OF_COMMENTS: num_comments,
             PAGE_NUMBER: p_num
