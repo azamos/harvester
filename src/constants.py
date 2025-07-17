@@ -34,13 +34,13 @@ ZERO_VALUE = 0
 EMPTY_STR = ""
 
 # Default values for program arguments
-DEFAULT_NUM_POST = 150
+DEFAULT_NUM_POST = 50
 DEAULT_MIN_SCORE = 0
 DEFAULT_MAX_SCORE = 1000000
 DEFAULT_SKIP_PAGES_STR = ""
 
 # Relative paths, files and extentions
-STATIC_FILE_PATH = "./htmlTestPages"
+STATIC_FILE_PATH = "./tests/data/hackernews"
 OUTPUT_FILE_PATH = "./output/result.csv"
 HTM_SUFFIX = ".htm"
 HTML_SUFFIX = ".html"
@@ -51,6 +51,7 @@ HELP_MIN_SCORE = "Minimal score(for filtering). Must be >= 0"
 HELP_MAX_SCORE = "Maximal score(for filtering). Must be >= max(0, min_score)"
 HELP_SKIP_PAGES = "Specify a list of pages to skip, in the format --pages = int,int,int,..."
 HELP_DEBUG = "Allows debug mode printing"
+HELP_OFFLINE = "Uses locally stored html pages instead of fetching from the actual site"
 
 # User messages
 MSG_SCRAPING = "Scraping"
