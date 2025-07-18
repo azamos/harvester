@@ -3,9 +3,9 @@ from src.constants import (
     READ_MODE,UTF_8,STATIC_FILE_PATH,HTML_SUFFIX,TR,TR_CLASS_NAME,
     SPAN, TITLE_A_CLASS_NAME,START,POSTS_PER_PAGE,ONE,
     TITLE,URL,AUTHOR,POINTS,NUMBER_OF_COMMENTS,PAGE_NUMBER,EMPTY_STR,
-    OUTPUT_FILE_PATH,ERR_MISSING_FIELDS
+    OUTPUT_FILE_PATH,ERR_MISSING_FIELDS,SOURCE_URL
     )
-from src.scraper import parser,filter_posts,extract_from_soup,save_to_csv
+from src.scraper import parser,filter_posts,extract_from_soup,save_to_csv, fetch_page
 
 def local_parser(file_path):
     #TODO: Switch to lxml parser instead of the default (suggested by BeautifulSoup documentation)
@@ -117,3 +117,13 @@ def test_save_to_csv_invalid():
     malformed_post = {"Wrong Key":5,"Another Wrong Key":"test"}
     with pytest.raises(ValueError,match=ERR_MISSING_FIELDS):
         save_to_csv([malformed_post])
+
+def test_fetch_page_valid():
+    response = fetch_page(SOURCE_URL+"1")
+    assert response !=None
+
+def test_fetch_page_invalid():
+    # Test that invalid URLs return None
+    assert fetch_page("http://localhost:9999") is None
+    assert fetch_page("https://this-domain-does-not-exist.com") is None
+    assert fetch_page("not-a-url") is None

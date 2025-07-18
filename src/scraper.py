@@ -12,9 +12,9 @@ from .utils import dbgprint, errprint
 
 def fetch_page(url):
     try:
-        reponse = requests.get(url,timeout=DEFAULT_TIMEOUT)
-        reponse.raise_for_status()
-        return reponse.text
+        response = requests.get(url,timeout=DEFAULT_TIMEOUT)
+        response.raise_for_status()
+        return response.text
     except requests.RequestException as e:
         errprint(e)
         return None
